@@ -11,126 +11,151 @@ A comprehensive tax calculation solution for e-commerce businesses, helping them
 - **Jurisdiction Management**: Add, edit, and delete tax jurisdictions
 - **Tax Rate Management**: Configure tax rates for different product types and jurisdictions
 - **Tax Rule Management**: Set up special tax rules and exemptions
+- **PostgreSQL Database**: Persistent storage for all tax data with robust relational capabilities
 
 ## Technology Stack
 
-- **Frontend**: React.js with React Router for navigation
-- **UI Components**: Custom-built components with responsive design
-- **State Management**: React Hooks for local state management
-- **API Communication**: Axios for API requests
-- **Styling**: CSS with responsive design for all device sizes
+### Frontend
+- React.js
+- React Router
+- Axios
+- CSS3
 
-## Getting Started
+### Backend
+- Node.js
+- Express.js
+- PostgreSQL
+- pg (Node PostgreSQL driver)
 
-### Prerequisites
+## Prerequisites
 
-- Node.js (v14.0.0 or higher)
-- npm (v6.0.0 or higher)
+- Node.js (v14 or higher)
+- npm or yarn
+- Docker and Docker Compose (for containerized deployment)
+- PostgreSQL (v12 or higher, included in Docker setup)
 
-### Installation
+## Installation
 
-1. Clone the repository:
+### Using Docker (Recommended)
+
+1. Clone the repository
    ```
-   git clone https://github.com/yourusername/e-commerce-tax-calculator.git
-   cd e-commerce-tax-calculator
+   git clone https://github.com/yourusername/ecommerce-tax-calculator.git
+   cd ecommerce-tax-calculator
    ```
 
-2. Install dependencies:
+2. Start the application using Docker Compose
    ```
-   # Install client dependencies
+   docker-compose up
+   ```
+
+   This will:
+   - Set up a PostgreSQL database
+   - Initialize the database schema and sample data
+   - Start the backend server
+   - Start the frontend development server
+
+3. Access the application
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+   - Database: PostgreSQL running on port 5432
+
+### Manual Installation
+
+1. Clone the repository
+   ```
+   git clone https://github.com/yourusername/ecommerce-tax-calculator.git
+   cd ecommerce-tax-calculator
+   ```
+
+2. Set up PostgreSQL
+   - Install PostgreSQL if not already installed
+   - Create a database named `tax_calculator`
+   - Run the initialization script: `psql -U postgres -d tax_calculator -f server/src/db/init.sql`
+
+3. Install backend dependencies and start the server
+   ```
+   cd server
+   npm install
+   npm start
+   ```
+
+4. Install frontend dependencies and start the client
+   ```
    cd client
    npm install
-   
-   # Install server dependencies (if applicable)
-   cd ../server
-   npm install
-   ```
-
-3. Set up environment variables:
-   - Create a `.env` file in the client directory
-   - Add the following variables:
-     ```
-     REACT_APP_API_BASE_URL=http://localhost:5000/api
-     ```
-
-4. Start the development server:
-   ```
-   # Start client
-   cd client
-   npm start
-   
-   # Start server (if applicable)
-   cd ../server
    npm start
    ```
 
-5. Open your browser and navigate to `http://localhost:3000`
+5. Access the application at http://localhost:3000
 
+## Database Schema
 
-## Usage Guide
+The application uses PostgreSQL with the following schema:
 
-### Tax Calculator
+- **jurisdictions**: Stores tax jurisdictions (countries, states, etc.)
+- **tax_rates**: Contains tax rates for different product types in each jurisdiction
+- **tax_rules**: Defines special tax rules and exemptions
+- **transactions**: Records completed tax calculations
 
-1. Navigate to the Tax Calculator page
-2. Enter customer location details
-3. Add one or more products with their details
-4. Click "Calculate Tax" to see the tax calculation results
+## Environment Variables
 
-### Transaction History
-
-1. Navigate to the Transaction History page
-2. View all past transactions
-3. Use the search and filter options to find specific transactions
-4. Click "View" to see detailed transaction information
-5. Click "Delete" to remove a transaction
-
-### Jurisdiction Management
-
-1. Navigate to the Jurisdiction Management page
-2. Add new jurisdictions with their details
-3. Edit existing jurisdictions as needed
-4. Delete jurisdictions that are no longer needed
-
-### Tax Rate Management
-
-1. Navigate to the Tax Rate Management page
-2. Add new tax rates for specific jurisdictions and product types
-3. Edit existing tax rates as needed
-4. Delete tax rates that are no longer applicable
-
-### Tax Rule Management
-
-1. Navigate to the Tax Rule Management page
-2. Add new tax rules for special cases or exemptions
-3. Edit existing tax rules as needed
-4. Delete tax rules that are no longer applicable
-
-
-
-## Testing
-
-Run tests using the following command:
+### Backend
+Create a `.env` file in the server directory with the following variables:
 ```
-cd client
-npm test
+NODE_ENV=development
+PORT=5000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=tax_calculator
 ```
+
+### Frontend
+Create a `.env` file in the client directory with:
+```
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+## Usage
+
+1. **Tax Calculator**: Enter customer location and product details to calculate applicable taxes
+2. **Jurisdiction Management**: Add and manage tax jurisdictions
+3. **Tax Rate Management**: Configure tax rates for different product types
+4. **Transaction History**: View past tax calculations
+5. **Database Status**: Check PostgreSQL connection status at /db-status
+
+## Development
+
+### Database Migrations
+
+The initial database schema is created using the `init.sql` script. For future schema changes, consider implementing a migration system using tools like:
+- node-pg-migrate
+- Sequelize migrations
+- Knex.js migrations
+
+### Testing Database Connection
+
+You can verify the PostgreSQL connection is working by:
+1. Visiting the Database Status page in the application (/db-status)
+2. Checking server logs for database connection messages
+3. Performing CRUD operations in the Jurisdiction Management page
 
 ## Deployment
 
-### Building for Production
+### Production Deployment
 
-```
-cd client
-npm run build
-```
-
-This will create a production-ready build in the `client/build` directory.
-
-### Deploying to a Server
-
-1. Transfer the build files to your web server
-2. Configure your server to serve the static files
-3. Set up any necessary environment variables
+1. Update environment variables for production
+2. Build the frontend
+   ```
+   cd client
+   npm run build
+   ```
+3. Transfer the build files to your web server
+4. Configure your server to serve the static files
+5. Set up any necessary environment variables
+6. Ensure PostgreSQL is properly secured for production use
 
 ## License
 
@@ -141,3 +166,5 @@ This project is licensed under the MIT License
 - [React.js](https://reactjs.org/) - Frontend library
 - [React Router](https://reactrouter.com/) - Routing library
 - [Axios](https://axios-http.com/) - HTTP client
+- [PostgreSQL](https://www.postgresql.org/) - Relational database
+- [pg](https://node-postgres.com/) - PostgreSQL client for Node.js

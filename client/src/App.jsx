@@ -8,6 +8,7 @@ import JurisdictionManagement from './pages/JurisdictionManagement/JurisdictionM
 import TaxRateManagement from './pages/TaxRateManagement/TaxRateManagement';
 import TaxRuleManagement from './pages/TaxRuleManagement/TaxRuleManagement';
 import TransactionHistory from './pages/TransactionHistory/TransactionHistory';
+import DbStatus from './pages/DbStatus/DbStatus';
 import './styles/global.css';
 
 
@@ -25,6 +26,7 @@ function App() {
             <Route path="/tax-rates" element={<TaxRateManagement />} />
             <Route path="/tax-rules" element={<TaxRuleManagement />} />
             <Route path="/transactions" element={<TransactionHistory />} />
+            <Route path="/db-status" element={<DbStatus />} />
           </Routes>
         </main>
 

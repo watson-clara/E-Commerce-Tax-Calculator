@@ -10,6 +10,7 @@
   - [Client-Side Architecture](#client-side-architecture)
   - [Server-Side Architecture](#server-side-architecture)
   - [Data Flow](#data-flow)
+  - [State Management Approach](#state-management-approach)
 - [Key Features Explained](#key-features-explained)
   - [Tax Calculator](#tax-calculator)
   - [Jurisdiction Management](#jurisdiction-management)
@@ -33,7 +34,7 @@
   - [2. What was the most challenging aspect of building this application?](#2-what-was-the-most-challenging-aspect-of-building-this-application)
   - [3. What is state management and how did you handle it in this application?](#3-what-is-state-management-and-how-did-you-handle-it-in-this-application)
   - [4. How did you handle error management in the application?](#4-how-did-you-handle-error-management-in-the-application)
-  - [5. How would you extend this application for future needs?](#5-how-would-you-extend-this-application-for-future-needs)
+  - [5. How did you implement and optimize the PostgreSQL database for this application?](#5-how-did-you-implement-and-optimize-the-postgresql-database-for-this-application)
 - [Conclusion](#conclusion)
 
 ## Project Overview
@@ -59,31 +60,50 @@ Online businesses face complex tax regulations that vary by location. This appli
 ### Backend Technologies
 - **Node.js**: A JavaScript runtime that executes code outside a web browser
 - **Express.js**: A web framework that simplifies creating API endpoints
-- **Mock Data Services**: Simulated backend functionality for development purposes
+- **PostgreSQL**: A powerful, open-source relational database system
+- **pg**: A PostgreSQL client for Node.js with connection pooling support
 
 ## Application Architecture
 
 The application follows a client-server architecture with clear separation of concerns:
 
+![Application Architecture Diagram](./Assets/application_architecture.png)
+
+This diagram illustrates the complete flow of data through the application, from user interface to database and back.
+
 ### Client-Side Architecture
 
 I organized the frontend using a component-based architecture:
 
-1. **Components**: Small, reusable pieces of the interface (buttons, forms, tables)
-2. **Pages**: Full screens that combine multiple components
-3. **Services**: Code that handles data management and API communication
-4. **Utilities**: Helper functions for common tasks
+1. **User Interface**: The visual elements users interact with
+2. **React Components**: Reusable UI building blocks that manage their own state
+3. **React Services**: Handle business logic and data processing on the client
+4. **Axios HTTP Client**: Manages API communication with the server
 
-This structure makes the code easier to maintain and test.
+#### Component Hierarchy
+
+The React application is structured with a clear component hierarchy:
+
+![Component Hierarchy](./Assets/component_hierarchy.png)
+
+This diagram shows how components are organized:
+
+- **App**: The root component that sets up routing and the overall structure
+- **Main Layout Components**: Navbar, Main Content, and Footer provide the application shell
+- **Page Components**: Each major feature has its own page component (Tax Calculator, Jurisdiction Management, etc.)
+- **UI Components**: Specialized components for forms, tables, and results displays
+
+This hierarchical structure promotes reusability and maintainability by breaking the UI into logical, manageable pieces.
 
 ### Server-Side Architecture
 
 The backend is designed with a layered architecture:
 
-1. **Routes Layer**: Defines API endpoints and handles HTTP requests/responses
-2. **Controller Layer**: Contains the logic for processing requests
-3. **Service Layer**: Implements business logic and data operations
-4. **Data Access Layer**: Handles database interactions and data persistence
+1. **Express API Routes**: Define endpoints and handle HTTP requests/responses
+2. **Controllers**: Process requests and coordinate the appropriate services
+3. **Services**: Implement business logic and orchestrate data operations
+4. **Repositories**: Handle database interactions and data persistence
+5. **PostgreSQL Database**: Stores all application data in a relational structure
 
 This separation allows for better organization and testability of the server-side code.
 
@@ -105,6 +125,39 @@ The application follows a clear data flow pattern:
    - Results are formatted and returned to the client
 
 This bidirectional flow ensures clean separation between presentation and business logic.
+
+### State Management Approach
+
+I implemented a comprehensive state management strategy to handle the complex data relationships in this application:
+
+![State Management Diagram](./Assets/state_management.png)
+
+The diagram above illustrates the four key aspects of state management in the application:
+
+#### Component State
+Using React's `useState` hook, I managed local component state for:
+- Form inputs and validation
+- UI control states (expanded/collapsed, selected tabs)
+- Component-specific display options
+
+#### Side Effects
+With the `useEffect` hook, I handled:
+- Data fetching from the API
+- Synchronization between different state values
+- Cleanup operations to prevent memory leaks
+
+#### Feature State
+Each major feature manages its own specialized state:
+- **Tax Calculator**: Manages product arrays and calculation results
+- **Jurisdiction Management**: Handles search and filtering functionality
+- **Transaction History**: Controls pagination and sorting options
+
+#### Shared State
+For application-wide state, I used React Context to manage:
+- User preferences (theme, display options)
+- Application settings (API endpoints, configuration)
+
+This layered approach to state management ensures that data flows predictably through the application while maintaining good performance and separation of concerns.
 
 ## Key Features Explained
 
@@ -210,7 +263,7 @@ The Transaction History feature keeps a record of all tax calculations performed
 - Supports viewing transaction details
 
 #### Technical Approach
-I implemented filtering and search functionality to help users find specific transactions quickly.
+I implemented filtering and search functionality using PostgreSQL's built-in search capabilities. The search queries the transactions table in the database directly, allowing users to efficiently find specific transactions by various fields like date, amount, and jurisdiction. This database-level search provides fast results even with large transaction histories.
 
 ## User Interface Design
 
@@ -270,52 +323,17 @@ GET    /api/transactions/:id  - Get a specific transaction
 
 ### Database Models
 
-I designed the data models with these structures:
+I designed the database schema in PostgreSQL with these structures:
 
-```javascript
-// Jurisdiction Model
-const JurisdictionSchema = {
-  name: { type: String, required: true },
-  code: { type: String, required: true, unique: true },
-  country: { type: String, required: true },
-  state: String,
-  localArea: String,
-  taxAuthority: String,
-  createdAt: Date,
-  updatedAt: Date
-};
+![Database ERD Diagram](./Assets/database_erd.png)
 
-// Tax Rate Model
-const TaxRateSchema = {
-  jurisdictionId: { 
-    type: String, 
-    required: true 
-  },
-  productType: { type: String, required: true },
-  rate: { type: Number, required: true },
-  effectiveDate: { type: Date, required: true },
-  endDate: Date
-};
+This Entity-Relationship Diagram shows the relationships between:
+- Jurisdictions (primary entity)
+- Tax rates (associated with jurisdictions and product types)
+- Tax rules (defining special conditions for taxation)
+- Transactions (recording completed tax calculations)
 
-// Transaction Model
-const TransactionSchema = {
-  customerLocation: {
-    country: { type: String, required: true },
-    state: String,
-    localArea: String
-  },
-  products: [{
-    name: { type: String, required: true },
-    type: { type: String, required: true },
-    price: { type: Number, required: true },
-    quantity: { type: Number, required: true, default: 1 }
-  }],
-  subtotal: { type: Number, required: true },
-  taxAmount: { type: Number, required: true },
-  total: { type: Number, required: true },
-  date: { type: Date, default: Date.now }
-};
-```
+The schema implements proper foreign key relationships and includes strategic indexes for performance optimization.
 
 ### Security Considerations
 
@@ -455,29 +473,98 @@ I implemented error handling at multiple levels:
 
 This multi-layered approach helped create a more robust application that could handle unexpected situations gracefully.
 
-### 5. How would you extend this application for future needs?
+### 5. How did you implement and optimize the PostgreSQL database for this application?
 
-I designed the application with extensibility in mind:
+The PostgreSQL database implementation was a critical part of this application. Here's how I approached it:
 
-1. **Additional Features**:
-   - Reporting and analytics dashboard
-   - Integration with e-commerce platforms
-   - Multi-language support
-   - More advanced tax rule configurations
+**Database Schema Design:**
+- I designed a normalized schema with clear entity relationships (jurisdictions, tax rates, rules, transactions)
+- Used appropriate data types for each column (VARCHAR for text, DECIMAL for monetary values, JSONB for complex data)
+- Implemented constraints to maintain data integrity (NOT NULL, UNIQUE, CHECK constraints, foreign keys)
+- Created a schema that balances normalization with query performance
 
-2. **Technical Enhancements**:
-   - Full backend implementation with database storage
-   - User authentication and authorization
-   - Automated testing suite
-   - Performance optimizations for larger datasets
+**Performance Optimizations:**
+- **Strategic Indexing**: Added indexes on frequently queried columns:
+  ```sql
+  CREATE INDEX idx_tax_rates_jurisdiction_product ON tax_rates(jurisdiction_id, product_type);
+  CREATE INDEX idx_transactions_date ON transactions(transaction_date);
+  ```
+- **Connection Pooling**: Implemented connection pooling to efficiently manage database connections:
+  ```javascript
+  // Database connection with pooling
+  const pool = new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+    max: 20, // Maximum number of clients in the pool
+    idleTimeoutMillis: 30000 // Close idle clients after 30 seconds
+  });
+  ```
+- **Query Optimization**: Wrote efficient SQL queries with proper JOINs and WHERE clauses
+- **Query Logging**: Added query logging to identify slow queries:
+  ```javascript
+  const query = async (text, params) => {
+    const start = Date.now();
+    try {
+      const result = await pool.query(text, params);
+      const duration = Date.now() - start;
+      console.log('Executed query', { text, duration, rows: result.rowCount });
+      return result;
+    } catch (error) {
+      console.error('Query error', { text, error });
+      throw error;
+    }
+  };
+  ```
 
-3. **User Experience Improvements**:
-   - Enhanced data visualization
-   - Guided setup wizards
-   - Bulk import/export functionality
-   - More advanced filtering and search capabilities
+**Advanced PostgreSQL Features:**
+- **JSONB for Complex Data**: Used JSONB data type for storing product details and customer location:
+  ```sql
+  CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    customer_location JSONB NOT NULL,
+    products JSONB NOT NULL,
+    -- other fields...
+  );
+  ```
+- **Transactions**: Implemented database transactions for operations that require atomicity:
+  ```javascript
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // Multiple database operations...
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+  ```
+- **Constraints**: Added CHECK constraints to ensure data validity:
+  ```sql
+  CONSTRAINT valid_rate CHECK (rate >= 0 AND rate <= 100)
+  ```
 
-The modular architecture makes it straightforward to add these enhancements without major rewrites.
+**Data Access Layer:**
+- Created a repository pattern to abstract database operations
+- Implemented proper error handling for database queries
+- Used parameterized queries to prevent SQL injection:
+  ```javascript
+  const result = await db.query(
+    'SELECT * FROM jurisdictions WHERE country = $1 AND state_province = $2',
+    [country, state]
+  );
+  ```
+
+**Testing and Monitoring:**
+- Added a health check endpoint to verify database connectivity
+- Implemented a database status page in the UI to monitor connection status
+- Created database initialization scripts for consistent setup
+
+This comprehensive approach to database implementation ensured that the application had reliable data storage with good performance characteristics, even as the dataset grows over time.
 
 ## Conclusion
 
@@ -490,3 +577,4 @@ The E-Commerce Tax Calculator demonstrates my ability to:
 5. **Implement Business Logic**: I developed the logic needed to handle tax calculations correctly
 
 This project showcases my technical skills in React and frontend development, as well as my ability to understand and implement business requirements.
+

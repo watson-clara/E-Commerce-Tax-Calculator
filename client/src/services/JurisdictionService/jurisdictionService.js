@@ -1,63 +1,58 @@
-// Mock jurisdiction data and service functions
-const mockJurisdictions = [
-  {
-    id: '1',
-    name: 'California',
-    code: 'US-CA',
-    country: 'US',
-    state_province: 'CA',
-    local_area: '',
-    tax_authority: 'California Department of Tax and Fee Administration'
-  },
-  {
-    id: '2',
-    name: 'New York',
-    code: 'US-NY',
-    country: 'US',
-    state_province: 'NY',
-    local_area: '',
-    tax_authority: 'New York State Department of Taxation and Finance'
-  },
-  {
-    id: '3',
-    name: 'Texas',
-    code: 'US-TX',
-    country: 'US',
-    state_province: 'TX',
-    local_area: '',
-    tax_authority: 'Texas Comptroller of Public Accounts'
-  }
-];
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Get all jurisdictions
 export const getJurisdictions = async () => {
-  return [...mockJurisdictions];
+  try {
+    const response = await axios.get(`${API_URL}/jurisdictions`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching jurisdictions:', error);
+    throw error;
+  }
 };
 
-// Add a new jurisdiction
+// Get jurisdiction by ID
+export const getJurisdictionById = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/jurisdictions/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching jurisdiction ${id}:`, error);
+    throw error;
+  }
+};
+
+// Add new jurisdiction
 export const addJurisdiction = async (jurisdictionData) => {
-  const newId = (Math.max(...mockJurisdictions.map(j => parseInt(j.id))) + 1).toString();
-  const newJurisdiction = { ...jurisdictionData, id: newId };
-  mockJurisdictions.push(newJurisdiction);
-  return newJurisdiction;
+  try {
+    const response = await axios.post(`${API_URL}/jurisdictions`, jurisdictionData);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding jurisdiction:', error);
+    throw error;
+  }
 };
 
-// Update a jurisdiction
+// Update jurisdiction
 export const updateJurisdiction = async (id, jurisdictionData) => {
-  const index = mockJurisdictions.findIndex(j => j.id === id);
-  if (index === -1) {
-    throw new Error('Jurisdiction not found');
+  try {
+    const response = await axios.put(`${API_URL}/jurisdictions/${id}`, jurisdictionData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating jurisdiction ${id}:`, error);
+    throw error;
   }
-  mockJurisdictions[index] = { ...jurisdictionData, id };
-  return mockJurisdictions[index];
 };
 
-// Delete a jurisdiction
+// Delete jurisdiction
 export const deleteJurisdiction = async (id) => {
-  const index = mockJurisdictions.findIndex(j => j.id === id);
-  if (index === -1) {
-    throw new Error('Jurisdiction not found');
+  try {
+    const response = await axios.delete(`${API_URL}/jurisdictions/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting jurisdiction ${id}:`, error);
+    throw error;
   }
-  mockJurisdictions.splice(index, 1);
-  return { success: true };
 }; 
