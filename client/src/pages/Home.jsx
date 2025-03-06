@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import './Home.css';
 
 const Home = () => {
   return (
@@ -9,8 +11,8 @@ const Home = () => {
           A comprehensive solution for calculating sales tax for digital products across multiple jurisdictions.
         </p>
         <div className="cta-buttons">
-          <a href="/calculator" className="btn btn-primary">Try the Calculator</a>
-          <a href="/jurisdictions" className="btn btn-secondary">Manage Jurisdictions</a>
+          <Link to="/calculator" className="btn btn-primary">Try the Calculator</Link>
+          <Link to="/jurisdictions" className="btn btn-secondary">Manage Jurisdictions</Link>
         </div>
       </section>
 

@@ -22,6 +22,12 @@
       line-height: 1.6;
     }
   </style>
+  <script>
+    // Redirect to home page if we're at the root
+    if (window.location.pathname === '/') {
+      window.location.href = '/calculator';
+    }
+  </script>
 </head>
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
