@@ -9,7 +9,7 @@ import TaxRateManagement from './pages/TaxRateManagement/TaxRateManagement';
 import TaxRuleManagement from './pages/TaxRuleManagement/TaxRuleManagement';
 import TransactionHistory from './pages/TransactionHistory/TransactionHistory';
 import './styles/global.css';
-import './styles/management-pages.css';
+
 
 function App() {
   return (
