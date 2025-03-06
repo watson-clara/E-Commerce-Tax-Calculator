@@ -42,33 +42,57 @@ export const taxRules = {
 
 // Calculate tax for a set of products
 export const calculateTax = (products, customerLocation) => {
-  // Calculate subtotal
-  const subtotal = products.reduce(
-    (sum, product) => sum + (parseFloat(product.price) * parseInt(product.quantity)),
-    0
-  );
-  
-  // Determine tax rate based on location
-  const locationKey = `${customerLocation.country}-${customerLocation.state || ''}`;
-  
-  // Apply tax rules for each product
-  let totalTaxAmount = 0;
-  
-  for (const product of products) {
-    const productSubtotal = parseFloat(product.price) * parseInt(product.quantity);
-    const taxAmount = calculateTaxWithRules(product, customerLocation, productSubtotal);
-    totalTaxAmount += taxAmount;
+  // Validate inputs
+  if (!products || products.length === 0) {
+    throw new Error('No products provided');
   }
   
-  const total = subtotal + totalTaxAmount;
-  const jurisdictionName = taxRates[locationKey]?.name || 'Unknown';
+  if (!customerLocation || !customerLocation.country || !customerLocation.state_province) {
+    throw new Error('Invalid customer location');
+  }
+  
+  // Calculate subtotal
+  const subtotal = products.reduce((sum, product) => {
+    return sum + (product.unit_price * product.quantity);
+  }, 0);
+  
+  // Determine tax rate based on location and product types
+  let taxRate = 0;
+  
+  // Simple mock tax rates based on state
+  const stateTaxRates = {
+    'CA': 8.25, // California
+    'NY': 4.5,  // New York
+    'TX': 6.25, // Texas
+    'FL': 6.0   // Florida
+  };
+  
+  taxRate = stateTaxRates[customerLocation.state_province] || 0;
+  
+  // Check for exemptions (simplified mock logic)
+  // In a real app, this would check against tax rules in the database
+  const hasExemptProducts = products.some(product => {
+    // E-books are exempt in NY
+    return product.product_type === 'E-book' && customerLocation.state_province === 'NY';
+  });
+  
+  if (hasExemptProducts) {
+    // If there are exempt products, we'd need more complex calculation
+    // For this mock, we'll just reduce the tax rate
+    taxRate = taxRate / 2;
+  }
+  
+  // Calculate tax amount
+  const taxAmount = (subtotal * taxRate) / 100;
+  
+  // Calculate total
+  const total = subtotal + taxAmount;
   
   return {
-    subtotal: subtotal.toFixed(2),
-    taxRate: taxRates[locationKey]?.rate || 0,
-    taxAmount: totalTaxAmount.toFixed(2),
-    total: total.toFixed(2),
-    jurisdiction: jurisdictionName,
+    subtotal,
+    tax_rate: taxRate,
+    tax_amount: taxAmount,
+    total
   };
 };
 

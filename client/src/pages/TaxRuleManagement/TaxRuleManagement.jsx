@@ -1,130 +1,202 @@
 import React, { useState, useEffect } from 'react';
+import { getTaxRules, addTaxRule, updateTaxRule, deleteTaxRule } from '../../services/TaxRuleService/taxRuleService';
+import { getJurisdictions } from '../../services/JurisdictionService/jurisdictionService';
+import './TaxRuleManagement.css';
 
 const TaxRuleManagement = () => {
   const [taxRules, setTaxRules] = useState([]);
   const [jurisdictions, setJurisdictions] = useState([]);
-  const [newTaxRule, setNewTaxRule] = useState({
+  const [formData, setFormData] = useState({
+    id: '',
     jurisdiction_id: '',
-    rule_name: '',
-    rule_description: '',
-    rule_logic: {
-      exemptProductTypes: [],
-      specialRates: []
-    }
+    product_type: '',
+    rule_type: '',
+    threshold_value: '',
+    is_exempt: false,
+    description: ''
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState({
+    jurisdiction_id: '',
+    product_type: '',
+    rule_type: '',
+    is_exempt: ''
+  });
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
 
-  // Mock data for demonstration
   useEffect(() => {
-    // In a real app, this would fetch from your API
-    const mockJurisdictions = [
-      { id: 1, name: 'California' },
-      { id: 2, name: 'New York' },
-      { id: 3, name: 'Texas' },
-      { id: 4, name: 'Ontario' },
-      { id: 5, name: 'United Kingdom' }
-    ];
-    
-    const mockTaxRules = [
-      { 
-        id: 1, 
-        jurisdiction_id: 1, 
-        jurisdiction_name: 'California', 
-        rule_name: 'Digital Products Exemption', 
-        rule_description: 'Some digital products are exempt from sales tax in California',
-        rule_logic: {
-          exemptProductTypes: ['E-book', 'Digital Media']
-        }
-      },
-      { 
-        id: 2, 
-        jurisdiction_id: 5, 
-        jurisdiction_name: 'United Kingdom', 
-        rule_name: 'Zero-rated Publications', 
-        rule_description: 'Certain digital publications are zero-rated in the UK',
-        rule_logic: {
-          exemptProductTypes: ['E-book'],
-          conditions: [
-            { field: 'name', operator: 'not_contains', value: 'game' }
-          ]
-        }
-      }
-    ];
-    
-    setJurisdictions(mockJurisdictions);
-    setTaxRules(mockTaxRules);
-    setLoading(false);
+    loadTaxRules();
+    loadJurisdictions();
   }, []);
 
+  const loadTaxRules = async () => {
+    try {
+      const data = await getTaxRules();
+      setTaxRules(data);
+    } catch (err) {
+      setError('Failed to load tax rules');
+      console.error(err);
+    }
+  };
+
+  const loadJurisdictions = async () => {
+    try {
+      const data = await getJurisdictions();
+      setJurisdictions(data);
+    } catch (err) {
+      setError('Failed to load jurisdictions');
+      console.error(err);
+    }
+  };
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTaxRule({
-      ...newTaxRule,
-      [name]: value
+    const { name, value, type, checked } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: type === 'checkbox' ? checked : value 
     });
   };
 
-  const handleExemptProductChange = (e) => {
-    const { value, checked } = e.target;
-    let updatedExemptProducts = [...newTaxRule.rule_logic.exemptProductTypes];
-    
-    if (checked) {
-      updatedExemptProducts.push(value);
-    } else {
-      updatedExemptProducts = updatedExemptProducts.filter(type => type !== value);
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilter({ ...filter, [name]: value });
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const toggleFilter = () => {
+    setIsFilterVisible(!isFilterVisible);
+  };
+
+  const applyFilter = () => {
+    // In a real app, this would call the API with filter parameters
+    // For now, we'll just simulate filtering on the client side
+    loadTaxRules();
+  };
+
+  const resetFilter = () => {
+    setFilter({
+      jurisdiction_id: '',
+      product_type: '',
+      rule_type: '',
+      is_exempt: ''
+    });
+    loadTaxRules();
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditing) {
+        await updateTaxRule(formData.id, formData);
+      } else {
+        await addTaxRule(formData);
+      }
+      resetForm();
+      loadTaxRules();
+    } catch (err) {
+      setError(isEditing ? 'Failed to update tax rule' : 'Failed to add tax rule');
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (taxRule) => {
+    setFormData(taxRule);
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this tax rule?')) {
+      try {
+        await deleteTaxRule(id);
+        loadTaxRules();
+      } catch (err) {
+        setError('Failed to delete tax rule');
+        console.error(err);
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      id: '',
+      jurisdiction_id: '',
+      product_type: '',
+      rule_type: '',
+      threshold_value: '',
+      is_exempt: false,
+      description: ''
+    });
+    setIsEditing(false);
+  };
+
+  const getJurisdictionName = (id) => {
+    const jurisdiction = jurisdictions.find(j => j.id === id);
+    return jurisdiction ? jurisdiction.name : 'Unknown';
+  };
+
+  // Filter and search tax rules
+  const filteredTaxRules = taxRules.filter(taxRule => {
+    // Search functionality - check if search term is in jurisdiction name, product type, or description
+    const jurisdictionName = getJurisdictionName(taxRule.jurisdiction_id).toLowerCase();
+    if (searchTerm && 
+        !jurisdictionName.includes(searchTerm.toLowerCase()) &&
+        !taxRule.product_type.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !taxRule.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
     }
     
-    setNewTaxRule({
-      ...newTaxRule,
-      rule_logic: {
-        ...newTaxRule.rule_logic,
-        exemptProductTypes: updatedExemptProducts
-      }
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // In a real app, this would send a POST request to your API
-    const selectedJurisdiction = jurisdictions.find(j => j.id === parseInt(newTaxRule.jurisdiction_id));
+    // Apply filters
+    if (filter.jurisdiction_id && taxRule.jurisdiction_id !== filter.jurisdiction_id) {
+      return false;
+    }
+    if (filter.product_type && taxRule.product_type !== filter.product_type) {
+      return false;
+    }
+    if (filter.rule_type && taxRule.rule_type !== filter.rule_type) {
+      return false;
+    }
+    if (filter.is_exempt !== '' && taxRule.is_exempt !== (filter.is_exempt === 'true')) {
+      return false;
+    }
     
-    const mockNewTaxRule = {
-      ...newTaxRule,
-      id: taxRules.length + 1,
-      jurisdiction_id: parseInt(newTaxRule.jurisdiction_id),
-      jurisdiction_name: selectedJurisdiction ? selectedJurisdiction.name : 'Unknown'
-    };
-    
-    setTaxRules([...taxRules, mockNewTaxRule]);
-    setNewTaxRule({
-      jurisdiction_id: '',
-      rule_name: '',
-      rule_description: '',
-      rule_logic: {
-        exemptProductTypes: [],
-        specialRates: []
-      }
-    });
-  };
+    return true;
+  });
 
-  if (loading) return <div>Loading tax rules...</div>;
-  if (error) return <div>Error loading tax rules: {error}</div>;
+  // Get unique product types for filter dropdown
+  const productTypes = [...new Set(taxRules.map(tr => tr.product_type))].filter(Boolean);
+  
+  // Get unique rule types for filter dropdown
+  const ruleTypes = [...new Set(taxRules.map(tr => tr.rule_type))].filter(Boolean);
 
   return (
-    <div className="tax-rule-management">
+    <div className="tax-rule-management-page">
+      <div className="page-header">
       <h1>Tax Rule Management</h1>
-      
-      <section className="add-tax-rule">
-        <h2>Add New Tax Rule</h2>
+        <p className="page-description">
+          Create and manage special tax rules and exemptions for different product types and jurisdictions.
+        </p>
+      </div>
+
+      <div className="calculator-form">
+        <div className="form-section">
+          <h2>{isEditing ? 'Edit Tax Rule' : 'Add New Tax Rule'}</h2>
+          {error && <div className="alert alert-danger">{error}</div>}
+          
         <form onSubmit={handleSubmit}>
+            <div className="form-row">
           <div className="form-group">
-            <label htmlFor="jurisdiction_id">Jurisdiction:</label>
+                <label htmlFor="jurisdiction_id">Jurisdiction</label>
             <select
               id="jurisdiction_id"
               name="jurisdiction_id"
-              value={newTaxRule.jurisdiction_id}
+                  value={formData.jurisdiction_id}
               onChange={handleInputChange}
+                  className="form-control"
               required
             >
               <option value="">Select Jurisdiction</option>
@@ -137,84 +209,258 @@ const TaxRuleManagement = () => {
           </div>
           
           <div className="form-group">
-            <label htmlFor="rule_name">Rule Name:</label>
+                <label htmlFor="product_type">Product Type</label>
+                <select
+                  id="product_type"
+                  name="product_type"
+                  value={formData.product_type}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  required
+                >
+                  <option value="">Select Product Type</option>
+                  <option value="Physical Good">Physical Good</option>
+                  <option value="Digital Software">Digital Software</option>
+                  <option value="E-book">E-book</option>
+                  <option value="Digital Media">Digital Media</option>
+                  <option value="Service">Service</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="rule_type">Rule Type</label>
+                <select
+                  id="rule_type"
+                  name="rule_type"
+                  value={formData.rule_type}
+              onChange={handleInputChange}
+                  className="form-control"
+              required
+                >
+                  <option value="">Select Rule Type</option>
+                  <option value="Threshold">Threshold</option>
+                  <option value="Exemption">Exemption</option>
+                  <option value="Special Rate">Special Rate</option>
+                  <option value="Seasonal">Seasonal</option>
+                </select>
+          </div>
+          
+          <div className="form-group">
+                <label htmlFor="threshold_value">Threshold Value</label>
+                <input
+                  type="number"
+                  id="threshold_value"
+                  name="threshold_value"
+                  value={formData.threshold_value}
+              onChange={handleInputChange}
+                  className="form-control"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+          </div>
+          
+            <div className="form-row">
+          <div className="form-group">
+            <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="is_exempt"
+                    name="is_exempt"
+                    checked={formData.is_exempt}
+                    onChange={handleInputChange}
+                  />
+                  <label htmlFor="is_exempt">Is Exempt</label>
+                </div>
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+            
+            <div className="action-buttons">
+              <button type="submit" className="btn btn-primary">
+                {isEditing ? 'Update Tax Rule' : 'Add Tax Rule'}
+              </button>
+              {isEditing && (
+                <button type="button" className="btn btn-secondary" onClick={resetForm}>
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <div className="results-section">
+        <h2 className="results-header">Existing Tax Rules</h2>
+        
+        <div className="table-controls">
+          <div className="search-container">
             <input
               type="text"
-              id="rule_name"
-              name="rule_name"
-              value={newTaxRule.rule_name}
-              onChange={handleInputChange}
-              required
+              placeholder="Search by jurisdiction, product type, or description..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="search-input"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="rule_description">Description:</label>
-            <textarea
-              id="rule_description"
-              name="rule_description"
-              value={newTaxRule.rule_description}
-              onChange={handleInputChange}
-              rows="3"
-            ></textarea>
+          <div className="filter-toggle">
+            <button 
+              className="btn btn-outline-secondary btn-sm"
+              onClick={toggleFilter}
+            >
+              {isFilterVisible ? 'Hide Filters' : 'Show Filters'}
+            </button>
           </div>
-          
-          <div className="form-group">
-            <label>Exempt Product Types:</label>
-            <div className="checkbox-group">
-              {['Digital Software', 'E-book', 'Online Course', 'Subscription Service', 'Digital Media', 'Other'].map(type => (
-                <div key={type} className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    id={`exempt-${type}`}
-                    name={`exempt-${type}`}
-                    value={type}
-                    checked={newTaxRule.rule_logic.exemptProductTypes.includes(type)}
-                    onChange={handleExemptProductChange}
-                  />
-                  <label htmlFor={`exempt-${type}`}>{type}</label>
-                </div>
-              ))}
+        </div>
+        
+        {isFilterVisible && (
+          <div className="filter-section">
+            <div className="filter-row">
+              <div className="filter-group">
+                <label>Jurisdiction</label>
+                <select
+                  name="jurisdiction_id"
+                  value={filter.jurisdiction_id}
+                  onChange={handleFilterChange}
+                  className="form-control form-control-sm"
+                >
+                  <option value="">All Jurisdictions</option>
+                  {jurisdictions.map(jurisdiction => (
+                    <option key={jurisdiction.id} value={jurisdiction.id}>
+                      {jurisdiction.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Product Type</label>
+                <select
+                  name="product_type"
+                  value={filter.product_type}
+                  onChange={handleFilterChange}
+                  className="form-control form-control-sm"
+                >
+                  <option value="">All Product Types</option>
+                  {productTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Rule Type</label>
+                <select
+                  name="rule_type"
+                  value={filter.rule_type}
+                  onChange={handleFilterChange}
+                  className="form-control form-control-sm"
+                >
+                  <option value="">All Rule Types</option>
+                  {ruleTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label>Exempt Status</label>
+                <select
+                  name="is_exempt"
+                  value={filter.is_exempt}
+                  onChange={handleFilterChange}
+                  className="form-control form-control-sm"
+                >
+                  <option value="">All</option>
+                  <option value="true">Exempt</option>
+                  <option value="false">Not Exempt</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="filter-actions">
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={applyFilter}
+              >
+                Apply Filters
+              </button>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={resetFilter}
+              >
+                Reset
+              </button>
             </div>
           </div>
-          
-          <button type="submit" className="btn btn-primary">Add Tax Rule</button>
-        </form>
-      </section>
-      
-      <section className="tax-rules-list">
-        <h2>Existing Tax Rules</h2>
-        <table>
+        )}
+        
+        <div className="results-table-container">
+          <table className="results-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Jurisdiction</th>
-              <th>Rule Name</th>
+                <th>Product Type</th>
+                <th>Rule Type</th>
+                <th>Threshold</th>
+                <th>Exempt</th>
               <th>Description</th>
-              <th>Exempt Product Types</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {taxRules.map(taxRule => (
+              {filteredTaxRules.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="no-results">No tax rules found</td>
+                </tr>
+              ) : (
+                filteredTaxRules.map((taxRule) => (
               <tr key={taxRule.id}>
-                <td>{taxRule.id}</td>
-                <td>{taxRule.jurisdiction_name}</td>
-                <td>{taxRule.rule_name}</td>
-                <td>{taxRule.rule_description}</td>
-                <td>
-                  {taxRule.rule_logic.exemptProductTypes && 
-                   taxRule.rule_logic.exemptProductTypes.join(', ')}
-                </td>
-                <td>
-                  <button className="btn btn-small">Edit</button>
-                  <button className="btn btn-small btn-danger">Delete</button>
+                    <td>{getJurisdictionName(taxRule.jurisdiction_id)}</td>
+                    <td>{taxRule.product_type}</td>
+                    <td>{taxRule.rule_type}</td>
+                    <td>{taxRule.threshold_value || 'N/A'}</td>
+                    <td>{taxRule.is_exempt ? 'Yes' : 'No'}</td>
+                    <td>{taxRule.description}</td>
+                    <td>
+                      <div className="button-group">
+                        <button 
+                          className="btn btn-edit btn-sm" 
+                          onClick={() => handleEdit(taxRule)}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          className="btn btn-danger btn-sm" 
+                          onClick={() => handleDelete(taxRule.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
                 </td>
               </tr>
-            ))}
+                ))
+              )}
           </tbody>
         </table>
-      </section>
+        </div>
+      </div>
     </div>
   );
 };

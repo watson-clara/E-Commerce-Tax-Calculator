@@ -6,8 +6,8 @@
 
 .hero-section {
   text-align: center;
-  padding: 3rem 1rem;
   margin-bottom: 3rem;
+  padding: 3rem 1rem;
   background-color: #f8f9fa;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -21,51 +21,20 @@
 
 .hero-section .lead {
   font-size: 1.2rem;
-  color: #555;
+  color: #7f8c8d;
   max-width: 800px;
   margin: 0 auto 2rem;
-  line-height: 1.6;
 }
 
-.cta-buttons {
+.hero-buttons {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
 }
 
-.btn {
-  display: inline-block;
-  padding: 0.8rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
 
-.btn-primary {
-  background-color: #3498db;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #2980b9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.btn-secondary {
-  background-color: #2c3e50;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #1a2530;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 
 .features-overview {
   margin-bottom: 3rem;
@@ -79,26 +48,42 @@
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
 }
 
 .feature-card {
   background-color: white;
-  padding: 1.5rem;
   border-radius: 8px;
+  padding: 1.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .feature-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .feature-card h3 {
-  color: #3498db;
+  color: #2c3e50;
   margin-bottom: 1rem;
+}
+
+.feature-card p {
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+}
+
+.feature-link {
+  display: inline-block;
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.feature-link:hover {
+  text-decoration: underline;
 }
 
 .about-section {
@@ -111,30 +96,38 @@
 .about-section h2 {
   color: #2c3e50;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .about-section p {
+  color: #7f8c8d;
   line-height: 1.6;
-  color: #555;
 }
 
+.management-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hero-cta {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 2rem 1rem;
-  }
-  
   .hero-section h1 {
     font-size: 2rem;
   }
   
-  .cta-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .btn {
-    width: 100%;
-    max-width: 300px;
+  .hero-section .lead {
+    font-size: 1rem;
     text-align: center;
     margin-bottom: 0.5rem;
   }
@@ -142,4 +135,154 @@
   .feature-grid {
     grid-template-columns: 1fr;
   }
-} 
+}
+
+/* Add these styles for the tab interface */
+.features-tabs {
+  margin-bottom: 3rem;
+ 
+  border-radius: 8px;
+ 
+  overflow: hidden;
+}
+
+.tab-navigation {
+  display: flex;
+  overflow-x: auto;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  width: 100%;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #7f8c8d;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tab-button:hover {
+  color: #3498db;
+}
+
+.tab-button.active {
+  color: #3498db;
+  border-bottom: 3px solid #3498db;
+}
+
+.feature-content {
+  padding: 2rem;
+  text-align: center;
+}
+
+.feature-content h2 {
+  color: #50312c;
+  margin-bottom: 1rem;
+}
+
+.feature-content p {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Add these styles to your existing CSS */
+
+.calculator-feature {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.calculator-feature h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.calculator-feature p {
+  color: #7f8c8d;
+  max-width: 800px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}
+
+.feature-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+.management-features {
+  margin-bottom: 3rem;
+}
+
+.management-features h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.section-intro {
+  text-align: center;
+  color: #7f8c8d;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+}
+
+
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+  .tab-navigation {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  
+  .tab-button {
+    flex: 0 0 auto;
+    min-width: 150px;
+  }
+}
+
+
+
+
+/* Update the tab navigation to make tabs equally spaced */
+.features-tabs .tab-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.features-tabs .tab-navigation button {
+  flex: 1;
+  margin: 0 0.5rem;
+}
+
+.features-tabs .tab-navigation button:first-child {
+  margin-left: 0;
+}
+
+.features-tabs .tab-navigation button:last-child {
+  margin-right: 0;
+}
+
+/* Make the active tab more prominent */
+.features-tabs .tab-navigation button.active {
+  border-bottom: 3px solid #3498db;
+ 
+}

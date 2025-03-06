@@ -9,13 +9,15 @@ import TaxRateManagement from './pages/TaxRateManagement/TaxRateManagement';
 import TaxRuleManagement from './pages/TaxRuleManagement/TaxRuleManagement';
 import TransactionHistory from './pages/TransactionHistory/TransactionHistory';
 import './styles/global.css';
+import './styles/management-pages.css';
 
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className="app">
         <Navbar />
-        <main className="container">
+        
+        <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/calculator" element={<TaxCalculator />} />
@@ -25,6 +27,7 @@ function App() {
             <Route path="/transactions" element={<TransactionHistory />} />
           </Routes>
         </main>
+
         <Footer />
       </div>
     </Router>
