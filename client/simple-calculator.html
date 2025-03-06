@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Tax Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .product-item {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+    .results h3 {
+      margin-top: 0;
+    }
+    .results-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .results-label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>E-Commerce Tax Calculator</h1>
+    
+    <div id="calculator">
+      <div class="form-group">
+        <label for="country">Country:</label>
+        <select id="country">
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="UK">United Kingdom</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="state-container">
+        <label for="state">State/Province:</label>
+        <select id="state">
+          <option value="CA">California</option>
+          <option value="NY">New York</option>
+          <option value="TX">Texas</option>
+          <option value="FL">Florida</option>
+        </select>
+      </div>
+      
+      <div id="products-container">
+        <h3>Products</h3>
+        <div class="product-item">
+          <div class="form-group">
+            <label for="product-name-1">Product Name:</label>
+            <input type="text" id="product-name-1" placeholder="Product Name">
+          </div>
+          
+          <div class="form-group">
+            <label for="product-type-1">Product Type:</label>
+            <select id="product-type-1">
+              <option value="Digital Software">Digital Software</option>
+              <option value="E-book">E-book</option>
+              <option value="Online Course">Online Course</option>
+              <option value="Subscription Service">Subscription Service</option>
+              <option value="Digital Media">Digital Media</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="product-price-1">Price:</label>
+            <input type="number" id="product-price-1" placeholder="0.00" step="0.01" min="0">
+          </div>
+          
+          <div class="form-group">
+            <label for="product-quantity-1">Quantity:</label>
+            <input type="number" id="product-quantity-1" value="1" min="1">
+          </div>
+        </div>
+      </div>
+      
+      <button id="add-product">Add Product</button>
+      <button id="calculate">Calculate Tax</button>
+      
+      <div id="results" class="results" style="display: none;">
+        <h3>Tax Calculation Results</h3>
+        <div class="results-row">
+          <span class="results-label">Subtotal:</span>
+          <span id="result-subtotal">$0.00</span>
+        </div>
+        <div class="results-row">
+          <span class="results-label" id="result-tax-rate-label">Tax Rate:</span>
+          <span id="result-tax-rate">0%</span>
+        </div>
+        <div class="results-row">
+          <span class="results-label">Tax Amount:</span>
+          <span id="result-tax-amount">$0.00</span>
+        </div>
+        <div class="results-row">
+          <span class="results-label">Total:</span>
+          <span id="result-total">$0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let productCount = 1;
+      
+      // Tax rates
+      const taxRates = {
+        'US-CA': { rate: 8.5, name: 'California' },
+        'US-NY': { rate: 8.875, name: 'New York' },
+        'US-TX': { rate: 6.25, name: 'Texas' },
+        'US-FL': { rate: 6.0, name: 'Florida' },
+        'CA-ON': { rate: 13.0, name: 'Ontario' },
+        'CA-BC': { rate: 12.0, name: 'British Columbia' },
+        'CA-QC': { rate: 14.975, name: 'Quebec' },
+        'UK-': { rate: 20.0, name: 'United Kingdom' },
+      };
+      
+      // Update state options based on country
+      document.getElementById('country').addEventListener('change', function() {
+        const country = this.value;
+        const stateContainer = document.getElementById('state-container');
+        const stateSelect = document.getElementById('state');
+        
+        stateSelect.innerHTML = '';
+        
+        if (country === 'US') {
+          stateContainer.style.display = 'block';
+          
+          const usStates = [
+            { value: 'CA', text: 'California' },
+            { value: 'NY', text: 'New York' },
+            { value: 'TX', text: 'Texas' },
+            { value: 'FL', text: 'Florida' }
+          ];
+          
+          usStates.forEach(state => {
+            const option = document.createElement('option');
+            option.value = state.value;
+            option.textContent = state.text;
+            stateSelect.appendChild(option);
+          });
+        } else if (country === 'CA') {
+          stateContainer.style.display = 'block';
+          
+          const caProvinces = [
+            { value: 'ON', text: 'Ontario' },
+            { value: 'BC', text: 'British Columbia' },
+            { value: 'QC', text: 'Quebec' }
+          ];
+          
+          caProvinces.forEach(province => {
+            const option = document.createElement('option');
+            option.value = province.value;
+            option.textContent = province.text;
+            stateSelect.appendChild(option);
+          });
+        } else {
+          stateContainer.style.display = 'none';
+        }
+      });
+      
+      // Add product button
+      document.getElementById('add-product').addEventListener('click', function() {
+        productCount++;
+        
+        const productItem = document.createElement('div');
+        productItem.className = 'product-item';
+        productItem.innerHTML = `
+          <div class="form-group">
+            <label for="product-name-${productCount}">Product Name:</label>
+            <input type="text" id="product-name-${productCount}" placeholder="Product Name">
+          </div>
+          
+          <div class="form-group">
+            <label for="product-type-${productCount}">Product Type:</label>
+            <select id="product-type-${productCount}">
+              <option value="Digital Software">Digital Software</option>
+              <option value="E-book">E-book</option>
+              <option value="Online Course">Online Course</option>
+              <option value="Subscription Service">Subscription Service</option>
+              <option value="Digital Media">Digital Media</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="product-price-${productCount}">Price:</label>
+            <input type="number" id="product-price-${productCount}" placeholder="0.00" step="0.01" min="0">
+          </div>
+          
+          <div class="form-group">
+            <label for="product-quantity-${productCount}">Quantity:</label>
+            <input type="number" id="product-quantity-${productCount}" value="1" min="1">
+          </div>
+          
+          <button class="remove-product">Remove</button>
+        `;
+        
+        document.getElementById('products-container').appendChild(productItem);
+        
+        // Add remove button functionality
+        productItem.querySelector('.remove-product').addEventListener('click', function() {
+          productItem.remove();
+        });
+      });
+      
+      // Calculate tax button
+      document.getElementById('calculate').addEventListener('click', function() {
+        const country = document.getElementById('country').value;
+        const state = country === 'UK' ? '' : document.getElementById('state').value;
+        
+        // Collect products
+        const products = [];
+        for (let i = 1; i <= productCount; i++) {
+          const nameElement = document.getElementById(`product-name-${i}`);
+          if (!nameElement) continue; // Skip if element doesn't exist (was removed)
+          
+          const name = nameElement.value;
+          const type = document.getElementById(`product-type-${i}`).value;
+          const price = document.getElementById(`product-price-${i}`).value;
+          const quantity = document.getElementById(`product-quantity-${i}`).value;
+          
+          if (name && price) {
+            products.push({
+              name,
+              type,
+              price,
+              quantity
+            });
+          }
+        }
+        
+        if (products.length === 0) {
+          alert('Please add at least one product with name and price.');
+          return;
+        }
+        
+        // Calculate tax
+        const locationKey = `${country}-${state}`;
+        const taxInfo = taxRates[locationKey] || { rate: 0, name: 'Unknown' };
+        
+        const subtotal = products.reduce(
+          (sum, product) => sum + (parseFloat(product.price) * parseInt(product.quantity)),
+          0
+        );
+        
+        const taxAmount = subtotal * (taxInfo.rate / 100);
+        const total = subtotal + taxAmount;
+        
+        // Display results
+        document.getElementById('result-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById('result-tax-rate-label').textContent = `Tax Rate (${taxInfo.name}):`;
+        document.getElementById('result-tax-rate').textContent = `${taxInfo.rate}%`;
+        document.getElementById('result-tax-amount').textContent = `$${taxAmount.toFixed(2)}`;
+        document.getElementById('result-total').textContent = `$${total.toFixed(2)}`;
+        
+        document.getElementById('results').style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html> 
