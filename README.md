@@ -1,139 +1,143 @@
 # E-Commerce Tax Calculator
 
-A comprehensive solution for calculating sales tax for digital products across multiple jurisdictions.
+A comprehensive tax calculation solution for e-commerce businesses, helping them navigate complex tax regulations across different jurisdictions.
+
+
 
 ## Features
 
-- **Tax Calculation**: Calculate accurate sales tax for digital products based on customer location and product type.
-- **Jurisdiction Management**: Manage tax jurisdictions, rates, and special rules for different regions.
-- **Transaction History**: Track and review past transactions with detailed tax information.
-- **Reporting**: Generate tax reports for compliance and financial planning.
+- **Tax Calculator**: Calculate taxes for products based on jurisdiction and product type
+- **Transaction History**: View and manage past transactions
+- **Jurisdiction Management**: Add, edit, and delete tax jurisdictions
+- **Tax Rate Management**: Configure tax rates for different product types and jurisdictions
+- **Tax Rule Management**: Set up special tax rules and exemptions
 
 ## Technology Stack
 
-- **Frontend**: React, TypeScript, CSS
-- **Backend**: Node.js, Express
-- **Database**: PostgreSQL
+- **Frontend**: React.js with React Router for navigation
+- **UI Components**: Custom-built components with responsive design
+- **State Management**: React Hooks for local state management
+- **API Communication**: Axios for API requests
+- **Styling**: CSS with responsive design for all device sizes
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm or yarn
-- PostgreSQL
+- Node.js (v14.0.0 or higher)
+- npm (v6.0.0 or higher)
 
 ### Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/ecommerce-tax-calculator.git
-   cd ecommerce-tax-calculator
+   ```
+   git clone https://github.com/yourusername/e-commerce-tax-calculator.git
+   cd e-commerce-tax-calculator
    ```
 
 2. Install dependencies:
-   ```bash
-   # Install server dependencies
-   cd server
-   npm install
-
+   ```
    # Install client dependencies
-   cd ../client
+   cd client
+   npm install
+   
+   # Install server dependencies (if applicable)
+   cd ../server
    npm install
    ```
 
-3. Set up the database:
-   ```bash
-   # Create the database
-   createdb ecommerce_tax_calculator
+3. Set up environment variables:
+   - Create a `.env` file in the client directory
+   - Add the following variables:
+     ```
+     REACT_APP_API_BASE_URL=http://localhost:5000/api
+     ```
 
-   # Run the schema script
-   psql -d ecommerce_tax_calculator -f database/schema.sql
+4. Start the development server:
    ```
-
-4. Configure environment variables:
-   ```bash
-   # In the server directory, create a .env file
-   cd ../server
-   touch .env
-   ```
-
-   Add the following to the .env file:
-   ```
-   PORT=5000
-   DB_USER=your_db_user
-   DB_PASSWORD=your_db_password
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_NAME=ecommerce_tax_calculator
-   ```
-
-### Running the Application
-
-1. Start the server:
-   ```bash
-   cd server
-   npm run dev
-   ```
-
-2. Start the client:
-   ```bash
+   # Start client
    cd client
+   npm start
+   
+   # Start server (if applicable)
+   cd ../server
    npm start
    ```
 
-3. Open your browser and navigate to `http://localhost:3000`
+5. Open your browser and navigate to `http://localhost:3000`
 
-## API Documentation
 
-### Tax Calculation
+## Usage Guide
 
-- **POST /api/calculator/calculate**
-  - Calculate tax for products based on customer location
-  - Request body:
-    ```json
-    {
-      "products": [
-        {
-          "name": "Software License",
-          "type": "Digital Software",
-          "price": 99.99,
-          "quantity": 1
-        }
-      ],
-      "customerLocation": {
-        "country": "US",
-        "state": "CA"
-      }
-    }
-    ```
-  - Response:
-    ```json
-    {
-      "subtotal": "99.99",
-      "taxRate": 8.5,
-      "taxAmount": "8.50",
-      "total": "108.49",
-      "jurisdiction": "California"
-    }
-    ```
+### Tax Calculator
 
-### Jurisdictions
+1. Navigate to the Tax Calculator page
+2. Enter customer location details
+3. Add one or more products with their details
+4. Click "Calculate Tax" to see the tax calculation results
 
-- **GET /api/jurisdictions**
-  - Get all jurisdictions
-- **POST /api/jurisdictions**
-  - Create a new jurisdiction
-- **PUT /api/jurisdictions/:id**
-  - Update a jurisdiction
-- **DELETE /api/jurisdictions/:id**
-  - Delete a jurisdiction
+### Transaction History
+
+1. Navigate to the Transaction History page
+2. View all past transactions
+3. Use the search and filter options to find specific transactions
+4. Click "View" to see detailed transaction information
+5. Click "Delete" to remove a transaction
+
+### Jurisdiction Management
+
+1. Navigate to the Jurisdiction Management page
+2. Add new jurisdictions with their details
+3. Edit existing jurisdictions as needed
+4. Delete jurisdictions that are no longer needed
+
+### Tax Rate Management
+
+1. Navigate to the Tax Rate Management page
+2. Add new tax rates for specific jurisdictions and product types
+3. Edit existing tax rates as needed
+4. Delete tax rates that are no longer applicable
+
+### Tax Rule Management
+
+1. Navigate to the Tax Rule Management page
+2. Add new tax rules for special cases or exemptions
+3. Edit existing tax rules as needed
+4. Delete tax rules that are no longer applicable
+
+
+
+## Testing
+
+Run tests using the following command:
+```
+cd client
+npm test
+```
+
+## Deployment
+
+### Building for Production
+
+```
+cd client
+npm run build
+```
+
+This will create a production-ready build in the `client/build` directory.
+
+### Deploying to a Server
+
+1. Transfer the build files to your web server
+2. Configure your server to serve the static files
+3. Set up any necessary environment variables
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License
 
 ## Acknowledgments
 
-- Tax rate information is for demonstration purposes only
-- Icons provided by [FontAwesome](https://fontawesome.com/)
+- [React.js](https://reactjs.org/) - Frontend library
+- [React Router](https://reactrouter.com/) - Routing library
+- [Axios](https://axios-http.com/) - HTTP client
